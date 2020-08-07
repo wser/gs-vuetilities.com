@@ -8,9 +8,23 @@
       Iusto.
     </p>
 
-    <div v-for="edge in $page.allGoogleSheet.edges" :key="edge.node.id">
-      <h2>{{ edge.node.data }}</h2>
-    </div>
+    <select v-model="selected" @change.prevent="onChange($event)">
+      <option
+        v-for="(option, i) in options"
+        v-bind:value="option.value"
+        :key="i"
+      >
+        {{ option.text }}
+      </option>
+    </select>
+    <span>Selected: {{ selected }}</span>
+    <br />
+
+    <ul>
+      <li v-for="edge in fData" :key="edge.id">
+        {{ edge.data }}
+      </li>
+    </ul>
   </Layout>
 </template>
 
@@ -18,7 +32,7 @@
 
 <page-query>
   query MyData {
-    allGoogleSheet {
+    res: allGoogleSheet {
       edges {
         node {
           id
@@ -34,6 +48,41 @@
 export default {
   metaInfo: {
     title: 'Table',
+  },
+  data() {
+    return {
+      fData: [],
+      selected: null,
+      options: [
+        { text: 'One', value: 1 },
+        { text: 'Two', value: 2 },
+        { text: 'Three', value: 3 },
+        { text: 'Four', value: 4 },
+      ],
+    };
+  },
+  computed: {},
+  methods: {
+    onChange(event) {
+      return this.getRelatedData(event.target.value);
+    },
+
+    getRelatedData(parentId) {
+      // create new array for easier filter
+      let newArr = [];
+      const obj = this.$page.res;
+      obj.edges.forEach(({ node }) => {
+        if (node.id == parentId) {
+          newArr.push({
+            id: node.id,
+            title: node.title,
+            data: node.data,
+          });
+        }
+      });
+      this.fData = newArr;
+      return newArr;
+    },
   },
 };
 </script>
